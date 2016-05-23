@@ -26,3 +26,5 @@
 *.exe
 *.out
 *.app
+/WindowsApi/bin
+/WindowsApi/obj

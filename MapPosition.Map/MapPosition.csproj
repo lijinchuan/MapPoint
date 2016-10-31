@@ -54,6 +54,7 @@
     <Compile Include="Map\ChinaArea.cs" />
     <Compile Include="Map\City.cs" />
     <Compile Include="Map\Country.cs" />
+    <Compile Include="Map\GPS.cs" />
     <Compile Include="Map\MapCore.cs" />
     <Compile Include="Map\MapPoint.cs" />
     <Compile Include="Map\Piecearea.cs" />
@@ -64,8 +65,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MapData\chinaBoudler.xml" />
-    <Content Include="MapData\foreignermappoint.xml" />
+    <Content Include="MapData\chinaBoudler.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="MapData\foreignermappoint.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

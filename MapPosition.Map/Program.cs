@@ -21,7 +21,9 @@ namespace TestES
 
             //var ct = Map.MapCore.LoadChinaCountryMap();
 
-            var area = MapCore.Location(131.140361, 44.222059);
+            var lon = 120.428758;
+            var lat = 30.886504;
+            var area = MapCore.Location(lon, lat);
 
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Restart();

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using TestES.Map;
 
 namespace MapPosition.Map
 {
@@ -72,7 +73,9 @@ namespace MapPosition.Map
                 return location ?? DefaultLocation;
             }
 
-            var area = China.Position(new MapPoint(longitude, latitude));
+            var gcj = GPS.Gcj_encrypt(latitude, longitude);
+            var bd = GPS.Bd_encrypt(gcj[0], gcj[1]);
+            var area = China.Position(new MapPoint(bd[1], bd[0]));
 
             if (area != null)
             {

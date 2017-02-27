@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Xml.Serialization;
 
 namespace MapPosition.Map
@@ -9,6 +11,118 @@ namespace MapPosition.Map
     [Serializable]
     public abstract class ChinaArea
     {
+        private const int Earth_Radii = 6378137;
+        private static ConcurrentDictionary<int, List<ChinaArea>> PositionDic = new ConcurrentDictionary<int, List<ChinaArea>>();
+
+        public static void ClearPositionNear()
+        {
+            List<ChinaArea> list;
+            var key = Thread.CurrentThread.ManagedThreadId;
+            PositionDic.TryRemove(key, out list);
+        }
+
+        static void AddPostion(ChinaArea positon)
+        {
+            var key = Thread.CurrentThread.ManagedThreadId;
+            List<ChinaArea> list = null;
+            if (PositionDic.TryGetValue(key, out list))
+            {
+                list.Add(positon);
+            }
+            else
+            {
+                list = new List<ChinaArea>();
+                list.Add(positon);
+                PositionDic.TryAdd(key, list);
+            }
+        }
+
+        public static double Rad(double d)
+        {
+            return d * Math.PI / 180.0;
+        }
+
+        public static double CalDistance(double lat1, double lng1, double lat2, double lng2)
+        {
+            double radLat1 = Rad(lat1), radLat2 = Rad(lat2), radLng1 = Rad(lng1), radLng2 = Rad(lng2);
+            var s = CalDistance2(radLat1, radLng1, radLat2, radLng2);
+            return s;
+        }
+
+        public static double CalDistance2(double radLat1, double radLng1, double radLat2, double radLng2)
+        {
+            var s = Math.Acos(Math.Cos(radLat1) * Math.Cos(radLat2) * Math.Cos(radLng1 - radLng2) + Math.Sin(radLat1) * Math.Sin(radLat2)) * Earth_Radii;
+            return s;
+        }
+
+        public static ChinaArea GetNearPosition(MapPoint point)
+        {
+            var key = Thread.CurrentThread.ManagedThreadId;
+            List<ChinaArea> list = null;
+            ChinaArea minitem = null;
+            var min = double.MaxValue;
+            var radlat = Rad(point.Y);
+            var radlon = Rad(point.X);
+            if (PositionDic.TryGetValue(key, out list))
+            {
+                list = list.Select(p => p).ToList();
+                foreach (var item in list)
+                {
+                    if (item is Province)
+                    {
+                        var cities = (item as Province).Cities;
+                        if (cities == null)
+                        {
+                            foreach (var pts in item.MapPointsList)
+                            {
+                                foreach (var pt in pts)
+                                {
+                                    var dis = CalDistance2(radlat, radlon, Rad(pt.Y), Rad(pt.X));
+                                    if (dis < min)
+                                    {
+                                        min = dis;
+                                        minitem = item;
+                                    }
+                                }
+                            }
+
+                            continue;
+                        }
+                        foreach (var city in cities)
+                        {
+                            var ct = city.Position(point);
+                            if (ct != null)
+                            {
+                                return ct;
+                            }
+
+                            foreach (var pts in city.MapPointsList)
+                            {
+                                foreach (var pt in pts)
+                                {
+                                    var dis = CalDistance2(radlat, radlon, Rad(pt.Y), Rad(pt.X));
+                                    if (dis < min)
+                                    {
+                                        min = dis;
+                                        minitem = city;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (min < 100000)
+                {
+                    return minitem;
+                }
+                return null;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         [XmlAttribute("ID")]
         public string ID
         {
@@ -304,6 +418,10 @@ namespace MapPosition.Map
                 if (IsInArea(this.MapPointsList[i], MaxX != null ? MaxX[i] : 0, MaxY != null ? MaxY[i] : 0, point))
                 {
                     return this;
+                }
+                else
+                {
+                    AddPostion(this);
                 }
 
                 i++;

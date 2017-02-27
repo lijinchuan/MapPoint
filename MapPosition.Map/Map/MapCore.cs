@@ -73,6 +73,8 @@ namespace MapPosition.Map
                 return location ?? DefaultLocation;
             }
 
+            Country.Clear();
+
             var gcj = GPS.Gcj_encrypt(latitude, longitude);
             var bd = GPS.Bd_encrypt(gcj[0], gcj[1]);
             var area = China.Position(new MapPoint(bd[1], bd[0]));
@@ -83,6 +85,12 @@ namespace MapPosition.Map
             }
             else
             {
+                var near = Country.GetNearPosition(new MapPoint(longitude, latitude));
+                if (near != null)
+                {
+                    return near.Name;
+                }
+
                 string key = GetForeignerMapFindKey(longitude, latitude);
                 string location;
                 ForeignerPostionDic.TryGetValue(key, out location);

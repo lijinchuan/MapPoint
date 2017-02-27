@@ -73,7 +73,7 @@ namespace MapPosition.Map
                 return location ?? DefaultLocation;
             }
 
-            Country.Clear();
+            Country.ClearPositionNear();
 
             var gcj = GPS.Gcj_encrypt(latitude, longitude);
             var bd = GPS.Bd_encrypt(gcj[0], gcj[1]);

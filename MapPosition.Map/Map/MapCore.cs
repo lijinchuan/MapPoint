@@ -29,7 +29,7 @@ namespace MapPosition.Map
         private static void LoadChinaCountryMap()
         {
             China = XMLHelper.DeSerializerFile<Country>(ChinaMapDataPath);
-            China.FillName("");
+            //China.FillName("");
         }
 
         private static string GetForeignerMapFindKey(double longitude, double latitude)
@@ -98,6 +98,18 @@ namespace MapPosition.Map
                 return location ?? DefaultLocation;
             }
           
+        }
+
+        public static List<Province> GetChinaProvinceList(string provinceName)
+        {
+            if (!string.IsNullOrWhiteSpace(provinceName))
+            {
+                return China.ProvinceList.Where(p => provinceName.Equals(p.Name)).ToList();
+            }
+            else
+            {
+                return China.ProvinceList.ToList();
+            }
         }
     }
 }
